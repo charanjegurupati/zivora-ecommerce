@@ -18,7 +18,6 @@ import productRoutes from "./routes/product.routes.js";
 
 const app = express();
 
-// Allowed frontend origins
 const whitelist = (
   process.env.FRONTEND_ORIGIN ||
   "http://localhost:5173"
@@ -27,10 +26,8 @@ const whitelist = (
   .map((item) => item.trim())
   .filter(Boolean);
 
-// CORS Configuration
 const corsOptions = {
   origin(origin, callback) {
-    // Allow requests without origin (Postman/mobile apps)
     if (!origin || whitelist.includes(origin)) {
       callback(null, true);
     } else {
@@ -55,10 +52,10 @@ const corsOptions = {
   ],
 };
 
-// Rate limiters
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 5000,
+
   standardHeaders: true,
   legacyHeaders: false,
 
@@ -71,6 +68,7 @@ const globalLimiter = rateLimit({
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 500,
+
   standardHeaders: true,
   legacyHeaders: false,
 
@@ -80,7 +78,6 @@ const authLimiter = rateLimit({
   },
 });
 
-// CSP directives
 const cspDirectives = {
   defaultSrc: ["'self'"],
 
@@ -120,10 +117,8 @@ if (process.env.NODE_ENV === "production") {
   cspDirectives.upgradeInsecureRequests = [];
 }
 
-// Trust proxy (Render/Railway/Vercel)
 app.set("trust proxy", 1);
 
-// Helmet security
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
@@ -147,14 +142,11 @@ app.use(
   })
 );
 
-// CORS
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
-// Compression
 app.use(compression());
 
-// Logger
 app.use(
   morgan(
     process.env.NODE_ENV === "production"
@@ -163,33 +155,38 @@ app.use(
   )
 );
 
-// Body parsers
 app.use(express.json({ limit: "2mb" }));
-app.use(express.urlencoded({
-  extended: true,
-  limit: "2mb",
-}));
 
-// Cookie parser
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: "2mb",
+  })
+);
+
 app.use(cookieParser());
 
-// Security sanitizers
 app.use(mongoSanitize());
+
 app.use(xssClean());
 
-// Rate limiter
 app.use(globalLimiter);
 
-// Health route
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "Zivora Backend API Running 🚀",
+  });
+});
+
 app.get("/api/health", (_req, res) => {
-  res.json({
+  res.status(200).json({
     status: "success",
     message: "Zivora API is running",
     timestamp: new Date().toISOString(),
   });
 });
 
-// Routes
 app.use("/api/auth", authLimiter, authRoutes);
 
 app.use("/api/categories", categoryRoutes);
@@ -198,10 +195,8 @@ app.use("/api/products", productRoutes);
 
 app.use("/api/orders", orderRoutes);
 
-// 404 handler
 app.use(notFound);
 
-// Global error handler
 app.use(errorHandler);
 
 export default app;
