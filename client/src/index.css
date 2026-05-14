@@ -1,0 +1,81 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Manrope", sans-serif;
+
+  --color-ink-950: #102033;
+  --color-ink-900: #17304d;
+  --color-sand-50: #fbf8f2;
+  --color-sand-100: #f4ede0;
+  --color-honey-400: #d3a04f;
+  --color-honey-500: #bb8233;
+  --color-emerald-700: #25594a;
+  --color-blush-200: #f7d7c7;
+}
+
+:root {
+  color: #102033;
+  background:
+    radial-gradient(circle at top left, rgba(211, 160, 79, 0.12), transparent 28%),
+    radial-gradient(circle at top right, rgba(37, 89, 74, 0.12), transparent 24%),
+    linear-gradient(180deg, #fbf8f2 0%, #f6efe2 100%);
+  font-family: var(--font-body);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.surface-panel {
+  @apply rounded-[28px] border border-white/70 bg-white/85 shadow-[0_24px_70px_rgba(16,32,51,0.08)] backdrop-blur-md;
+}
+
+.surface-panel-dark {
+  @apply rounded-[28px] border border-white/10 bg-ink-950 text-sand-50 shadow-[0_24px_70px_rgba(16,32,51,0.24)];
+}
+
+.eyebrow {
+  @apply text-xs font-semibold uppercase tracking-[0.3em] text-honey-500;
+}
+
+.page-section {
+  @apply mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8;
+}
+
+.display-title {
+  font-family: var(--font-display);
+}
+
+.glass-button {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/70 bg-white/80 px-5 py-3 text-sm font-semibold text-ink-900 transition hover:-translate-y-0.5 hover:bg-white;
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(19, 34, 56, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(19, 34, 56, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
