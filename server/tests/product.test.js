@@ -9,6 +9,7 @@ const createAdminSession = async () => {
     email: "catalog-admin@example.com",
     password: "password123",
     role: "admin",
+    isEmailVerified: true,
   });
 
   const agent = request.agent(app);

@@ -115,7 +115,10 @@ export default function AuthPage() {
 
       navigate(location.state?.from || "/dashboard", { replace: true });
     } catch (error) {
-      toast.error(error.response?.data?.message || "Authentication failed.");
+      toast.error(
+        error.response?.data?.message ||
+          "Could not reach the auth server. Please check the API URL and CORS settings.",
+      );
     } finally {
       setSubmitting(false);
     }

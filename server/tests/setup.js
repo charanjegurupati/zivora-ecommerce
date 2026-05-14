@@ -8,6 +8,9 @@ beforeAll(async () => {
   process.env.JWT_ACCESS_SECRET = "test-access-secret";
   process.env.JWT_REFRESH_SECRET = "test-refresh-secret";
   process.env.FRONTEND_ORIGIN = "http://localhost:5173";
+  process.env.SMTP_HOST = "";
+  process.env.SMTP_USER = "";
+  process.env.SMTP_PASS = "";
   process.env.MONGOMS_SYSTEM_BINARY =
     process.env.MONGOMS_SYSTEM_BINARY ||
     "C:\\Program Files\\MongoDB\\Server\\8.3\\bin\\mongod.exe";

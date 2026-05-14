@@ -18,13 +18,21 @@ import productRoutes from "./routes/product.routes.js";
 
 const app = express();
 
-const whitelist = (
-  process.env.FRONTEND_ORIGIN ||
-  "http://localhost:5173"
-)
+const defaultFrontendOrigins = [
+  "http://localhost:5173",
+  "https://zivora-ecommerce.netlify.app",
+];
+
+const whitelist = [
+  ...defaultFrontendOrigins,
+  ...(
+    process.env.FRONTEND_ORIGIN ||
+    ""
+  )
   .split(",")
   .map((item) => item.trim())
-  .filter(Boolean);
+  .filter(Boolean),
+];
 
 const corsOptions = {
   origin(origin, callback) {

@@ -3,7 +3,7 @@ import app from "../src/app.js";
 import { User } from "../src/models/User.js";
 
 describe("Auth routes", () => {
-  test("register creates a customer and returns tokens", async () => {
+  test("register creates a customer and requires email verification", async () => {
     const response = await request(app).post("/api/auth/register").send({
       name: "Jane Buyer",
       email: "jane@example.com",
@@ -11,10 +11,12 @@ describe("Auth routes", () => {
     });
 
     expect(response.status).toBe(201);
-    expect(response.body.data.accessToken).toBeTruthy();
-    expect(response.body.data.user.email).toBe("jane@example.com");
-    expect(response.body.data.user.role).toBe("customer");
-    expect(response.headers["set-cookie"][0]).toContain("refreshToken=");
+    expect(response.body.data.requiresEmailVerification).toBe(true);
+    expect(response.body.data.userId).toBeTruthy();
+
+    const user = await User.findOne({ email: "jane@example.com" });
+    expect(user.role).toBe("customer");
+    expect(user.isEmailVerified).toBe(false);
   });
 
   test("login, me, refresh, and logout work together", async () => {
@@ -23,6 +25,7 @@ describe("Auth routes", () => {
       email: "admin@example.com",
       password: "password123",
       role: "admin",
+      isEmailVerified: true,
     });
 
     const agent = request.agent(app);

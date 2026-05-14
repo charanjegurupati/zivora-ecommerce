@@ -2,6 +2,11 @@ import nodemailer from "nodemailer";
 
 let transporter;
 
+const getFrontendOrigin = () =>
+  (process.env.FRONTEND_ORIGIN || "http://localhost:5173")
+    .split(",")[0]
+    .trim();
+
 const getTransporter = async () => {
   if (transporter) {
     return transporter;
@@ -64,9 +69,7 @@ export const sendVerificationEmail = async ({ to, customerName, token }) => {
   }
 
   const mailer = await getTransporter();
-  
-  // Hardcode FRONTEND_ORIGIN to the local URL for development mode
-  const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+  const frontendOrigin = getFrontendOrigin();
   const verificationLink = `${frontendOrigin}/verify-email?token=${token}&email=${encodeURIComponent(to)}`;
 
   const result = await mailer.sendMail({
@@ -130,8 +133,7 @@ export const sendPasswordResetEmail = async ({ to, customerName, token }) => {
   }
 
   const mailer = await getTransporter();
-  
-  const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+  const frontendOrigin = getFrontendOrigin();
   const resetLink = `${frontendOrigin}/reset-password?token=${token}&email=${encodeURIComponent(to)}`;
 
   const result = await mailer.sendMail({

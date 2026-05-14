@@ -11,6 +11,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { serializeUser } from "../utils/serialization.js";
 
 import {
+  sendEmailOtp,
   sendVerificationEmail,
   sendPasswordResetEmail,
 } from "../services/email.service.js";
@@ -261,6 +262,67 @@ export const resendVerificationEmail =
         "If the email is registered, a new verification link has been sent.",
     });
   });
+
+const createOtp = () => crypto.randomInt(100000, 1000000).toString();
+
+export const verifyOtp = asyncHandler(async (req, res) => {
+  const { userId, otp } = req.body;
+
+  const user = await User.findById(userId);
+
+  if (!user || !user.isActive) {
+    throw new AppError("User account is not available", 401);
+  }
+
+  const tokenDoc = await VerificationToken.findOne({
+    userId: user._id,
+    type: "email_otp",
+    expiresAt: { $gt: new Date() },
+  });
+
+  if (!tokenDoc || !(await tokenDoc.compareToken(otp))) {
+    throw new AppError("Invalid or expired OTP", 400);
+  }
+
+  await VerificationToken.deleteOne({ _id: tokenDoc._id });
+
+  return sendAuthResponse(res, user);
+});
+
+export const resendOtp = asyncHandler(async (req, res) => {
+  const { userId } = req.body;
+
+  const user = await User.findById(userId);
+
+  if (!user || !user.isActive) {
+    throw new AppError("User account is not available", 401);
+  }
+
+  const otp = createOtp();
+
+  await VerificationToken.deleteMany({
+    userId: user._id,
+    type: "email_otp",
+  });
+
+  await VerificationToken.create({
+    userId: user._id,
+    token: otp,
+    type: "email_otp",
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+  });
+
+  await sendEmailOtp({
+    to: user.email,
+    customerName: user.name,
+    otp,
+  });
+
+  return res.json({
+    status: "success",
+    message: "OTP sent successfully.",
+  });
+});
 
 export const forgotPassword = asyncHandler(
   async (req, res) => {
