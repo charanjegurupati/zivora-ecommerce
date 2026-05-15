@@ -87,7 +87,7 @@ export const sendVerificationEmail = async ({ to, customerName, token }) => {
   });
   
   // For development testing without SMTP setup, log the link to the terminal
-  if (mailer.transporter?.name === 'JSONTransport') {
+  if (mailer?.name === "JSONTransport") {
     console.log("-----------------------------------------");
     console.log(`[EMAIL SIMULATOR] Sent to ${to}`);
     console.log(`[EMAIL SIMULATOR] Verification Link: ${verificationLink}`);
@@ -117,7 +117,7 @@ export const sendEmailOtp = async ({ to, customerName, otp }) => {
     ].join("\n"),
   });
   
-  if (mailer.transporter?.name === 'JSONTransport') {
+  if (mailer?.name === "JSONTransport") {
     console.log("-----------------------------------------");
     console.log(`[EMAIL SIMULATOR] Sent OTP to ${to}`);
     console.log(`[EMAIL SIMULATOR] OTP Code: ${otp}`);
@@ -150,7 +150,7 @@ export const sendPasswordResetEmail = async ({ to, customerName, token }) => {
     ].join("\n"),
   });
   
-  if (mailer.transporter?.name === 'JSONTransport') {
+  if (mailer?.name === "JSONTransport") {
     console.log("-----------------------------------------");
     console.log(`[EMAIL SIMULATOR] Sent Password Reset to ${to}`);
     console.log(`[EMAIL SIMULATOR] Reset Link: ${resetLink}`);

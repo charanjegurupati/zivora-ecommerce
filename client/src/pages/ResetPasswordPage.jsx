@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../hooks/useAuth.js";
@@ -7,25 +7,12 @@ export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { resetPassword } = useAuth();
-  
-  const [token, setToken] = useState("");
-  const [email, setEmail] = useState("");
+
+  const token = searchParams.get("token") || "";
+  const email = searchParams.get("email") || "";
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const t = searchParams.get("token");
-    const e = searchParams.get("email");
-
-    if (!t || !e) {
-      setError("Invalid link. Missing reset token or email.");
-      return;
-    }
-
-    setToken(t);
-    setEmail(e);
-  }, [searchParams]);
+  const error = !token || !email ? "Invalid link. Missing reset token or email." : "";
 
   const handleSubmit = async (event) => {
     event.preventDefault();

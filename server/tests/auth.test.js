@@ -1,6 +1,7 @@
 import request from "supertest";
 import app from "../src/app.js";
 import { User } from "../src/models/User.js";
+import { VerificationToken } from "../src/models/VerificationToken.js";
 
 describe("Auth routes", () => {
   test("register creates a customer and requires email verification", async () => {
@@ -51,5 +52,59 @@ describe("Auth routes", () => {
 
     const logoutResponse = await agent.post("/api/auth/logout");
     expect(logoutResponse.status).toBe(200);
+  });
+
+  test("forgot password creates a reset token and reset password updates credentials", async () => {
+    const user = await User.create({
+      name: "Reset Tester",
+      email: "reset@example.com",
+      password: "password123",
+      role: "customer",
+      isEmailVerified: true,
+    });
+
+    const forgotResponse = await request(app)
+      .post("/api/auth/forgot-password")
+      .send({ email: "reset@example.com" });
+
+    expect(forgotResponse.status).toBe(200);
+
+    const generatedTokenDoc = await VerificationToken.findOne({
+      userId: user._id,
+      type: "password_reset",
+    });
+
+    expect(generatedTokenDoc).toBeTruthy();
+
+    await VerificationToken.deleteMany({
+      userId: user._id,
+      type: "password_reset",
+    });
+
+    const resetToken = "password-reset-token";
+
+    await VerificationToken.create({
+      userId: user._id,
+      token: resetToken,
+      type: "password_reset",
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    const actualResetResponse = await request(app)
+      .post("/api/auth/reset-password")
+      .send({
+        email: "reset@example.com",
+        token: resetToken,
+        newPassword: "newpassword123",
+      });
+
+    expect(actualResetResponse.status).toBe(200);
+
+    const loginResponse = await request(app).post("/api/auth/login").send({
+      email: "reset@example.com",
+      password: "newpassword123",
+    });
+
+    expect(loginResponse.status).toBe(200);
   });
 });

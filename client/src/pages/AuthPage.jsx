@@ -75,14 +75,31 @@ export default function AuthPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!form.email.includes("@")) {
-      toast.error("Please enter a valid email address.");
-      return;
-    }
+    if (mode === "otp") {
+      if (!otpForm.userId) {
+        toast.error("Please wait for the OTP flow to initialize.");
+        return;
+      }
 
-    if (form.password.length < 8) {
-      toast.error("Password must be at least 8 characters.");
-      return;
+      if (otpForm.otp.length !== 6) {
+        toast.error("OTP must be 6 digits.");
+        return;
+      }
+    } else if (mode === "forgot-password") {
+      if (!form.email.includes("@")) {
+        toast.error("Please enter a valid email address.");
+        return;
+      }
+    } else {
+      if (!form.email.includes("@")) {
+        toast.error("Please enter a valid email address.");
+        return;
+      }
+
+      if (form.password.length < 8) {
+        toast.error("Password must be at least 8 characters.");
+        return;
+      }
     }
 
     setSubmitting(true);

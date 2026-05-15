@@ -94,7 +94,9 @@ router.post(
   [
     emailRule,
     body("token").notEmpty().withMessage("Reset token is required"),
-    passwordRule,
+    body("newPassword")
+      .isLength({ min: 8 })
+      .withMessage("Password must be at least 8 characters"),
   ],
   validateRequest,
   resetPassword,
