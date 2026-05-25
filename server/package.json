@@ -8,6 +8,7 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "seed": "node src/scripts/seed.js",
+    "check-users": "node src/scripts/check-users.js",
     "lint": "eslint \"src/**/*.js\" \"tests/**/*.js\"",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
     "build": "node -e \"console.log('Server runtime build not required')\""
