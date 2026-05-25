@@ -35,6 +35,40 @@ const getTransporter = async () => {
 
 // Safe helper to send mail without throwing exceptions that crash the API
 const sendMailSafely = async (mailOptions) => {
+  const { to, subject, text, from } = mailOptions;
+
+  // 1. If Resend API Key is set, send via Resend HTTP API (avoids SMTP port blocks on Render!)
+  if (process.env.RESEND_API_KEY) {
+    try {
+      console.log(`Sending email to ${to} via Resend HTTP API...`);
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: from || "onboarding@resend.dev",
+          to,
+          subject,
+          text,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log(`✅ Success! Email sent via Resend API (ID: ${data.id})`);
+        return data;
+      } else {
+        throw new Error(data.message || JSON.stringify(data));
+      }
+    } catch (resendError) {
+      console.error("❌ Resend API sending failed, falling back to SMTP...", resendError);
+    }
+  }
+
+  // 2. Fallback to standard SMTP
   const mailer = await getTransporter();
   
   try {
