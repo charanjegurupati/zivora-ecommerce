@@ -33,6 +33,40 @@ const getTransporter = async () => {
   return transporter;
 };
 
+// Safe helper to send mail without throwing exceptions that crash the API
+const sendMailSafely = async (mailOptions) => {
+  const mailer = await getTransporter();
+  
+  try {
+    const result = await mailer.sendMail(mailOptions);
+    
+    // For development testing or JSONTransport fallback, log the output to terminal
+    if (mailer?.name === "JSONTransport") {
+      console.log("-----------------------------------------");
+      console.log(`[EMAIL SIMULATOR] Sent to ${mailOptions.to}`);
+      console.log(`[EMAIL SIMULATOR] Subject: ${mailOptions.subject}`);
+      console.log(`[EMAIL SIMULATOR] Body:\n${mailOptions.text}`);
+      console.log("-----------------------------------------");
+    }
+    
+    return result;
+  } catch (error) {
+    console.error(`📧 [EMAIL ERROR] Failed to send email to ${mailOptions.to}:`, error);
+    
+    // Always fallback to logging the details to console so the links are never lost
+    console.log("-----------------------------------------");
+    console.log(`[EMAIL FALLBACK] Sent to ${mailOptions.to}`);
+    console.log(`[EMAIL FALLBACK] Subject: ${mailOptions.subject}`);
+    console.log(`[EMAIL FALLBACK] Body:\n${mailOptions.text}`);
+    console.log("-----------------------------------------");
+    
+    return {
+      message: "Email sending failed, fell back to console logs",
+      error: error.message,
+    };
+  }
+};
+
 export const sendOrderStatusEmail = async ({
   to,
   customerName,
@@ -44,9 +78,7 @@ export const sendOrderStatusEmail = async ({
     return null;
   }
 
-  const mailer = await getTransporter();
-
-  return mailer.sendMail({
+  return sendMailSafely({
     from: process.env.SMTP_FROM || "no-reply@zivora.shop",
     to,
     subject: `Order ${orderId} is now ${orderStatus}`,
@@ -68,11 +100,10 @@ export const sendVerificationEmail = async ({ to, customerName, token }) => {
     return null;
   }
 
-  const mailer = await getTransporter();
   const frontendOrigin = getFrontendOrigin();
   const verificationLink = `${frontendOrigin}/verify-email?token=${token}&email=${encodeURIComponent(to)}`;
 
-  const result = await mailer.sendMail({
+  return sendMailSafely({
     from: process.env.SMTP_FROM || "no-reply@zivora.shop",
     to,
     subject: "Zivora: Verify your email address",
@@ -85,16 +116,6 @@ export const sendVerificationEmail = async ({ to, customerName, token }) => {
       "If you did not request this, please ignore this email.",
     ].join("\n"),
   });
-  
-  // For development testing without SMTP setup, log the link to the terminal
-  if (mailer?.name === "JSONTransport") {
-    console.log("-----------------------------------------");
-    console.log(`[EMAIL SIMULATOR] Sent to ${to}`);
-    console.log(`[EMAIL SIMULATOR] Verification Link: ${verificationLink}`);
-    console.log("-----------------------------------------");
-  }
-
-  return result;
 };
 
 export const sendEmailOtp = async ({ to, customerName, otp }) => {
@@ -102,9 +123,7 @@ export const sendEmailOtp = async ({ to, customerName, otp }) => {
     return null;
   }
 
-  const mailer = await getTransporter();
-
-  const result = await mailer.sendMail({
+  return sendMailSafely({
     from: process.env.SMTP_FROM || "no-reply@zivora.shop",
     to,
     subject: "Zivora: Your Login OTP",
@@ -116,15 +135,6 @@ export const sendEmailOtp = async ({ to, customerName, otp }) => {
       "This code is valid for 10 minutes. If you did not attempt to log in, please secure your account immediately.",
     ].join("\n"),
   });
-  
-  if (mailer?.name === "JSONTransport") {
-    console.log("-----------------------------------------");
-    console.log(`[EMAIL SIMULATOR] Sent OTP to ${to}`);
-    console.log(`[EMAIL SIMULATOR] OTP Code: ${otp}`);
-    console.log("-----------------------------------------");
-  }
-
-  return result;
 };
 
 export const sendPasswordResetEmail = async ({ to, customerName, token }) => {
@@ -132,11 +142,10 @@ export const sendPasswordResetEmail = async ({ to, customerName, token }) => {
     return null;
   }
 
-  const mailer = await getTransporter();
   const frontendOrigin = getFrontendOrigin();
   const resetLink = `${frontendOrigin}/reset-password?token=${token}&email=${encodeURIComponent(to)}`;
 
-  const result = await mailer.sendMail({
+  return sendMailSafely({
     from: process.env.SMTP_FROM || "no-reply@zivora.shop",
     to,
     subject: "Zivora: Reset your password",
@@ -149,13 +158,4 @@ export const sendPasswordResetEmail = async ({ to, customerName, token }) => {
       "If you did not request this, you can safely ignore this email. Your password will not change.",
     ].join("\n"),
   });
-  
-  if (mailer?.name === "JSONTransport") {
-    console.log("-----------------------------------------");
-    console.log(`[EMAIL SIMULATOR] Sent Password Reset to ${to}`);
-    console.log(`[EMAIL SIMULATOR] Reset Link: ${resetLink}`);
-    console.log("-----------------------------------------");
-  }
-
-  return result;
 };
