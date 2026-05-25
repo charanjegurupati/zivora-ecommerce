@@ -141,8 +141,10 @@ const products = [
   }
 ];
 
-const seed = async () => {
-  await connectDB(process.env.MONGO_URI);
+export const seedDatabase = async (shouldCloseConnection = false) => {
+  if (mongoose.connection.readyState === 0) {
+    await connectDB(process.env.MONGO_URI);
+  }
 
   try {
     let admin = await User.findOne({ email: adminCredentials.email }).select("+password");
@@ -212,12 +214,22 @@ const seed = async () => {
     console.log("Seed complete.");
     console.log(`Admin login: ${adminCredentials.email}`);
     console.log(`Admin password: ${adminCredentials.password}`);
+  } catch (error) {
+    console.error("Seed failed:", error);
+    throw error;
   } finally {
-    await mongoose.connection.close();
+    if (shouldCloseConnection) {
+      await mongoose.connection.close();
+    }
   }
 };
 
-seed().catch((error) => {
-  console.error("Seed failed:", error);
-  process.exit(1);
-});
+// Check if run directly from CLI
+const isMain = process.argv[1] && (process.argv[1].endsWith("seed.js") || process.argv[1].endsWith("seed"));
+if (isMain) {
+  seedDatabase(true).catch((error) => {
+    console.error("CLI Seed failed:", error);
+    process.exit(1);
+  });
+}
+

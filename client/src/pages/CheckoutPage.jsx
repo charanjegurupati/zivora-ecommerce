@@ -60,12 +60,14 @@ export default function CheckoutPage() {
              toast.error("Could not determine address");
           }
         } catch (error) {
+          console.error("Reverse geocoding error:", error);
           toast.error("Could not fetch address from location");
         } finally {
           setLoadingLocation(false);
         }
       },
       (error) => {
+        console.error("Geolocation service error:", error);
         toast.error("Location access denied or unavailable");
         setLoadingLocation(false);
       },

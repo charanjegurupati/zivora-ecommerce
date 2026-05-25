@@ -24,8 +24,10 @@ export default function AdminPage() {
   const [form, setForm] = useState(emptyProductForm);
   const [editingProductId, setEditingProductId] = useState("");
 
-  const fetchProducts = useCallback(async () => {
-    setLoadingProducts(true);
+  const fetchProducts = useCallback(async (showLoading = false) => {
+    if (showLoading) {
+      setLoadingProducts(true);
+    }
     try {
       const [prodRes, catRes] = await Promise.all([
         api.get("/products", { params: { limit: 100 } }),
@@ -33,7 +35,8 @@ export default function AdminPage() {
       ]);
       setProducts(prodRes.data?.data?.products || []);
       setCategories(catRes.data?.data?.categories || []);
-    } catch (err) {
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
       toast.error("Failed to load products.");
     } finally {
       setLoadingProducts(false);
@@ -41,6 +44,7 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProducts();
   }, [fetchProducts]);
 
@@ -68,7 +72,7 @@ export default function AdminPage() {
 
       setForm(emptyProductForm);
       setEditingProductId("");
-      await fetchProducts();
+      await fetchProducts(true);
     } catch (error) {
       toast.error(error.response?.data?.message || "Admin actions need the API server and an admin account.");
     }
@@ -93,7 +97,7 @@ export default function AdminPage() {
     try {
       await api.delete(`/products/${productId}`);
       toast.success("Product archived.");
-      await fetchProducts();
+      await fetchProducts(true);
     } catch (error) {
       toast.error(error.response?.data?.message || "Unable to archive product.");
     }
