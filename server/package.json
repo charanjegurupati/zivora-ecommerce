@@ -11,6 +11,7 @@
     "check-users": "node src/scripts/check-users.js",
     "clean-users": "node src/scripts/clean-users.js",
     "verify-user": "node src/scripts/verify-user.js",
+    "test-email": "node src/scripts/test-email.js",
     "lint": "eslint \"src/**/*.js\" \"tests/**/*.js\"",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
     "build": "node -e \"console.log('Server runtime build not required')\""
