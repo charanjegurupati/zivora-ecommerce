@@ -5,7 +5,8 @@ let transporter;
 const getFrontendOrigin = () =>
   (process.env.FRONTEND_ORIGIN || "http://localhost:5173")
     .split(",")[0]
-    .trim();
+    .trim()
+    .replace(/\/+$/, "");
 
 const getTransporter = async () => {
   if (transporter) {
