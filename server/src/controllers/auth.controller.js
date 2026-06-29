@@ -112,11 +112,11 @@ export const register = asyncHandler(async (req, res) => {
     ),
   });
 
-  await sendVerificationEmail({
+  sendVerificationEmail({
     to: user.email,
     customerName: user.name,
     token: emailToken,
-  });
+  }).catch(console.error);
 
   return res.status(201).json({
     status: "success",
@@ -171,11 +171,11 @@ export const login = asyncHandler(async (req, res) => {
     expiresAt: new Date(Date.now() + 10 * 60 * 1000),
   });
 
-  await sendEmailOtp({
+  sendEmailOtp({
     to: user.email,
     customerName: user.name,
     otp,
-  });
+  }).catch(console.error);
 
   return res.json({
     status: "success",
@@ -277,11 +277,11 @@ export const resendVerificationEmail =
       ),
     });
 
-    await sendVerificationEmail({
+    sendVerificationEmail({
       to: user.email,
       customerName: user.name,
       token: emailToken,
-    });
+    }).catch(console.error);
 
     return res.json({
       status: "success",
@@ -339,11 +339,11 @@ export const resendOtp = asyncHandler(async (req, res) => {
     expiresAt: new Date(Date.now() + 10 * 60 * 1000),
   });
 
-  await sendEmailOtp({
+  sendEmailOtp({
     to: user.email,
     customerName: user.name,
     otp,
-  });
+  }).catch(console.error);
 
   return res.json({
     status: "success",
@@ -392,11 +392,11 @@ export const forgotPassword = asyncHandler(
       ),
     });
 
-    await sendPasswordResetEmail({
+    sendPasswordResetEmail({
       to: user.email,
       customerName: user.name,
       token: resetToken,
-    });
+    }).catch(console.error);
 
     return res.json({
       status: "success",
