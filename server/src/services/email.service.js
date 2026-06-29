@@ -40,7 +40,47 @@ const getTransporter = async () => {
 const sendMailSafely = async (mailOptions) => {
   const { to, subject, text, from } = mailOptions;
 
-  // 1. If Resend API Key is set, send via Resend HTTP API (avoids SMTP port blocks on Render!)
+  // 1. If Brevo API Key is set, send via Brevo HTTP API
+  if (process.env.BREVO_API_KEY) {
+    try {
+      console.log(`Sending email to ${to} via Brevo API...`);
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "accept": "application/json",
+          "api-key": process.env.BREVO_API_KEY,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          sender: { 
+            email: "zivoraecommerce@gmail.com", 
+            name: "Zivora Support" 
+          },
+          to: [{ email: to }],
+          subject: subject,
+          textContent: text,
+        }),
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        data = { message: "Invalid JSON response from Brevo" };
+      }
+      
+      if (response.ok) {
+        console.log(`✅ Success! Email sent via Brevo API (ID: ${data.messageId})`);
+        return data;
+      } else {
+        throw new Error(data.message || JSON.stringify(data));
+      }
+    } catch (brevoError) {
+      console.error("❌ Brevo API sending failed, falling back...", brevoError);
+    }
+  }
+
+  // 2. If Resend API Key is set, send via Resend HTTP API
   if (process.env.RESEND_API_KEY) {
     try {
       console.log(`Sending email to ${to} via Resend HTTP API...`);
