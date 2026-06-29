@@ -78,7 +78,7 @@ const sendMailSafely = async (mailOptions) => {
     const result = await mailer.sendMail(mailOptions);
     
     // For development testing or JSONTransport fallback, log the output to terminal
-    if (mailer?.transporter?.name === "JSONTransport") {
+    if (mailer?.transporter?.name === "JSONTransport" || process.env.NODE_ENV === "development") {
       console.log("-----------------------------------------");
       console.log(`[EMAIL SIMULATOR] Sent to ${mailOptions.to}`);
       console.log(`[EMAIL SIMULATOR] Subject: ${mailOptions.subject}`);
