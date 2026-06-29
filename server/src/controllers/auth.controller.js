@@ -157,7 +157,34 @@ export const login = asyncHandler(async (req, res) => {
     );
   }
 
-  return sendAuthResponse(res, user);
+  const otp = createOtp();
+
+  await VerificationToken.deleteMany({
+    userId: user._id,
+    type: "email_otp",
+  });
+
+  await VerificationToken.create({
+    userId: user._id,
+    token: otp,
+    type: "email_otp",
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+  });
+
+  await sendEmailOtp({
+    to: user.email,
+    customerName: user.name,
+    otp,
+  });
+
+  return res.json({
+    status: "success",
+    data: {
+      requiresOtp: true,
+      userId: user._id,
+      email: user.email,
+    },
+  });
 });
 
 export const verifyEmail = asyncHandler(async (req, res) => {
